@@ -18,7 +18,7 @@ load_dotenv()
 mcp = FastMCP(
     "资讯大数据",
     instructions=(
-        "面向资讯搜索、企业资讯、行业主题研究和企业舆情动态监控。"
+        "面向企业简称解析、资讯搜索、企业资讯、行业主题研究和企业舆情动态监控。"
         "搜索类工具复用全域资讯搜索，企业监控工具复用舆情明细或统计接口。"
     ),
     dependencies=["python-dotenv", "requests"],
@@ -28,6 +28,7 @@ GATEWAY_BASE_URL = "https://console.handaas.com/api/v1/integrator/call_api"
 DEFAULT_TIMEOUT_SECONDS = 30.0
 
 PRODUCT_IDS = {
+    "enterprise_search": "675cea1f0e009a9ea37edaa1",
     "news_search": "6a60928a935bb6a5c6bbd68f",
     "company_news_details": "66b485eadaf8c77fb249a455",
     "company_news_statistics": "66b338e274bf098447db7efd",
@@ -237,6 +238,34 @@ def _company_news_statistics(
     return call_api(
         PRODUCT_IDS["company_news_statistics"],
         {"matchKeyword": match_keyword, "keywordType": keyword_type},
+    )
+
+
+@mcp.tool(title="关键词查询企业", annotations=READ_ONLY_TOOL)
+def information_enterprise_search(
+    matchKeyword: str,
+    pageIndex: int = 1,
+    pageSize: int = 10,
+) -> dict[str, Any]:
+    """
+    按企业简称、品牌、产品或其他关键词查询候选企业。
+
+    用户只提供简称时先调用本工具，再将候选企业的全称、企业 ID
+    或统一社会信用代码传给企业资讯或动态监控 Tool。
+
+    返回:
+    - total: 候选企业总数。
+    - resultList: 企业名称、企业 ID、统一社会信用代码及基础信息。
+    """
+    if error := _pagination_error(pageIndex, pageSize):
+        return error
+    return call_api(
+        PRODUCT_IDS["enterprise_search"],
+        {
+            "matchKeyword": matchKeyword,
+            "pageIndex": pageIndex,
+            "pageSize": pageSize,
+        },
     )
 
 

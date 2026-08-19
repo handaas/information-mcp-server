@@ -47,6 +47,7 @@ class ToolTests(TestCase):
         self.assertEqual(
             {tool.name for tool in tools},
             {
+                "information_enterprise_search",
                 "information_search",
                 "information_company_news",
                 "information_industry_news",
@@ -58,6 +59,24 @@ class ToolTests(TestCase):
             self.assertEqual(tool.outputSchema.get("type"), "object")
             self.assertTrue(tool.annotations.readOnlyHint)
             self.assertFalse(tool.annotations.destructiveHint)
+
+    def test_enterprise_search_resolves_abbreviated_company_names(self) -> None:
+        with patch.object(
+            server,
+            "call_api",
+            return_value={"total": 1, "resultList": [{"name": "企业A全称"}]},
+        ) as call:
+            result = server.information_enterprise_search("企业A", pageSize=5)
+        self.assertEqual(result["total"], 1)
+        call.assert_called_once_with(
+            server.PRODUCT_IDS["enterprise_search"],
+            {"matchKeyword": "企业A", "pageIndex": 1, "pageSize": 5},
+        )
+
+        with patch.object(server, "call_api") as call:
+            invalid = server.information_enterprise_search("企业A", pageSize=51)
+        self.assertEqual(invalid["parameter"], "pageSize")
+        call.assert_not_called()
 
     def test_search_scene_tools_reuse_news_search(self) -> None:
         for function in (
@@ -176,3 +195,11 @@ class ToolTests(TestCase):
             result = server.information_company_news("企业A", pageSize=100)
         self.assertEqual(result["parameter"], "pageSize")
         call.assert_not_called()
+
+
+class DocumentationTests(TestCase):
+    def test_readme_documents_enterprise_search_first(self) -> None:
+        readme = (SERVER_PATH.parents[1] / "README.md").read_text(encoding="utf-8")
+        self.assertIn("`information_enterprise_search`", readme)
+        self.assertIn("`675cea1f0e009a9ea37edaa1`", readme)
+        self.assertIn("企业简称无法直接查询时", readme)

@@ -1,9 +1,10 @@
 # 资讯大数据服务
 
-[该 MCP 服务提供全域资讯搜索、企业资讯、行业资讯、主题跟踪和企业动态监控能力，帮助用户开展行业研究、热点追踪、企业舆情和品牌声誉管理。](https://www.handaas.com/)
+[该 MCP 服务提供企业关键词搜索、全域资讯搜索、企业资讯、行业资讯、主题跟踪和企业动态监控能力，帮助用户开展行业研究、热点追踪、企业舆情和品牌声誉管理。](https://www.handaas.com/)
 
 ## 主要功能
 
+- 🏢 企业简称与关键词搜索
 - 🔍 全域资讯关键词检索
 - 🏢 企业新闻舆情查询
 - 🏭 行业与赛道资讯检索
@@ -12,7 +13,8 @@
 
 ## 服务设计说明
 
-- 服务按实际业务场景提供 5 个 Tool，不按上游 API 数量平铺工具。
+- 服务按实际业务场景提供 6 个 Tool，不按上游 API 数量平铺工具。
+- 用户只提供企业简称时，先用 `information_enterprise_search` 获取企业全称或稳定 ID。
 - 搜索、行业和主题 Tool 复用同一个全域资讯搜索 Product ID，但保留不同场景语义。
 - 上游资讯搜索结果由 MCP 层通过 `pageIndex` 和 `pageSize` 分页，默认每页 20 条，最大 50 条。
 - 搜索结果默认不返回长正文；设置 `includeContent=true` 后，可通过 `contentMaxChars` 限制每条正文长度。
@@ -112,6 +114,7 @@ python server/mcp_server.py streamable-http
 
 | MCP Tool | 功能或视图 | Product ID |
 |---|---|---|
+| `information_enterprise_search` | 企业简称、品牌或产品关键词查询企业 | `675cea1f0e009a9ea37edaa1` |
 | `information_search` | 全域资讯关键词与日期检索 | `6a60928a935bb6a5c6bbd68f` |
 | `information_company_news` | 企业新闻舆情明细 | `66b485eadaf8c77fb249a455` |
 | `information_industry_news` | 行业或赛道资讯检索 | `6a60928a935bb6a5c6bbd68f` |
@@ -119,7 +122,15 @@ python server/mcp_server.py streamable-http
 | `information_monitor` | `view=details` 企业资讯明细 | `66b485eadaf8c77fb249a455` |
 | `information_monitor` | `view=statistics` 企业资讯情感统计 | `66b338e274bf098447db7efd` |
 
-### 1. information_search
+### 1. information_enterprise_search
+
+**功能**：按企业简称、品牌、产品或其他关键词搜索候选企业。
+
+**主要参数**：`matchKeyword` 必需；`pageIndex` 默认 1；`pageSize` 默认 10、最大 50。
+
+**返回**：候选企业 `total/resultList`。确认企业后，将企业全称、企业 ID 或统一社会信用代码用于企业资讯和监控 Tool。
+
+### 2. information_search
 
 **功能**：按关键词搜索新闻资讯标题和正文。
 
@@ -134,7 +145,7 @@ python server/mcp_server.py streamable-http
 
 **返回**：`total` 和 `resultList`；结果可包含标题、来源、发布时间、资讯链接和按需截断的正文。
 
-### 2. information_company_news
+### 3. information_company_news
 
 **功能**：查询指定企业的新闻舆情明细。
 
@@ -148,7 +159,7 @@ python server/mcp_server.py streamable-http
 
 **返回**：`total` 和 `resultList`；结果可包含新闻简介、链接、来源、标题、发布时间、相关企业和情感标签。
 
-### 3. information_industry_news
+### 4. information_industry_news
 
 **功能**：按行业、赛道或产业关键词检索资讯，用于行业研究和市场动态分析。
 
@@ -161,7 +172,7 @@ python server/mcp_server.py streamable-http
 
 **返回**：`total` 和 `resultList`。
 
-### 4. information_topic
+### 5. information_topic
 
 **功能**：跟踪政策、技术、品牌或热点事件等明确主题。
 
@@ -174,7 +185,7 @@ python server/mcp_server.py streamable-http
 
 **返回**：`total` 和 `resultList`。
 
-### 5. information_monitor
+### 6. information_monitor
 
 **功能**：监控企业资讯动态，可选择新闻事件明细或情感统计视图。
 
@@ -190,23 +201,30 @@ python server/mcp_server.py streamable-http
 
 ## 使用场景
 
-1. **资讯检索**：按关键词聚合全域新闻标题、来源、时间和链接。
-2. **行业研究**：跟踪行业、赛道和产业相关动态。
-3. **主题跟踪**：持续观察政策、技术、品牌和热点事件。
-4. **企业舆情**：查询企业相关新闻并按情感类别筛选。
-5. **动态监控**：分析企业资讯情感分布和变化趋势。
-6. **品牌声誉管理**：结合新闻明细和情感统计识别声誉风险。
+1. **企业定位**：通过简称或品牌词确认企业全称与稳定标识。
+2. **资讯检索**：按关键词聚合全域新闻标题、来源、时间和链接。
+3. **行业研究**：跟踪行业、赛道和产业相关动态。
+4. **主题跟踪**：持续观察政策、技术、品牌和热点事件。
+5. **企业舆情**：查询企业相关新闻并按情感类别筛选。
+6. **动态监控**：分析企业资讯情感分布和变化趋势。
+7. **品牌声誉管理**：结合新闻明细和情感统计识别声誉风险。
 
 ## 使用注意事项
 
-1. **场景选择**：企业舆情使用 `information_company_news` 或 `information_monitor`；行业研究使用 `information_industry_news`。
-2. **分页限制**：`pageIndex` 从 1 开始，`pageSize` 必须在 1 到 50 之间。
-3. **正文控制**：默认不返回 `informationText`；需要正文时显式设置 `includeContent=true`。
-4. **正文长度**：`contentMaxChars` 必须在 100 到 5000 之间。
-5. **情感标签**：`0` 表示负面、`1` 表示正面、`2` 表示中性、`3` 表示未知。
-6. **合法空结果**：关键词、时间或情感条件无匹配时可能返回 `total=0` 和空 `resultList`。
+1. **简称处理**：企业简称无法直接查询时，先调用 `information_enterprise_search`。
+2. **场景选择**：企业舆情使用 `information_company_news` 或 `information_monitor`；行业研究使用 `information_industry_news`。
+3. **分页限制**：`pageIndex` 从 1 开始，`pageSize` 必须在 1 到 50 之间。
+4. **正文控制**：默认不返回 `informationText`；需要正文时显式设置 `includeContent=true`。
+5. **正文长度**：`contentMaxChars` 必须在 100 到 5000 之间。
+6. **情感标签**：`0` 表示负面、`1` 表示正面、`2` 表示中性、`3` 表示未知。
+7. **合法空结果**：关键词、时间或情感条件无匹配时可能返回 `total=0` 和空 `resultList`。
 
 ## 使用提问示例
+
+### information_enterprise_search（企业关键词搜索）
+
+1. “小米”对应哪些企业？
+2. 用“格力”找到准确企业名称和企业 ID。
 
 ### information_search（资讯全文检索）
 
