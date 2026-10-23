@@ -16,7 +16,7 @@ from mcp.types import ToolAnnotations
 load_dotenv()
 
 mcp = FastMCP(
-    "资讯大数据",
+    "资讯热点跟踪",
     instructions=(
         "面向企业简称解析、资讯搜索、企业资讯、行业主题研究和企业舆情动态监控。"
         "搜索类工具复用全域资讯搜索，企业监控工具复用舆情明细或统计接口。"
