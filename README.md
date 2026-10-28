@@ -1,11 +1,13 @@
 # 资讯热点跟踪
 
-[该 MCP 服务提供企业关键词搜索、全域资讯搜索、企业资讯、行业资讯、主题跟踪和企业动态监控能力，帮助用户开展行业研究、热点追踪、企业舆情和品牌声誉管理。](https://www.handaas.com/)
+[该 MCP 服务围绕资讯热点跟踪，提供企业关键词搜索、全域资讯搜索、企业资讯、行业资讯、主题跟踪和企业动态监控能力，帮助用户开展行业研究、热点追踪、企业舆情和品牌声誉管理。](https://www.handaas.com/)
+
+> 所属板块：综合信息
 
 ## 主要功能
 
 - 🏢 企业简称与关键词搜索
-- 🔍 全域资讯关键词检索
+- 🔍 全域资讯热点检索
 - 🏢 企业新闻舆情查询
 - 🏭 行业与赛道资讯检索
 - 🎯 政策、技术、品牌和事件主题跟踪
@@ -13,6 +15,7 @@
 
 ## 服务设计说明
 
+- 服务定位为“资讯热点跟踪”，支持从全域、企业、行业和主题四个视角持续开展同口径查询分析。
 - 服务按实际业务场景提供 6 个 Tool，不按上游 API 数量平铺工具。
 - 用户只提供企业简称时，先用 `information_enterprise_search` 获取企业全称或稳定 ID。
 - 搜索、行业和主题 Tool 复用同一个全域资讯搜索 Product ID，但保留不同场景语义。
@@ -109,6 +112,23 @@ python server/mcp_server.py streamable-http
 ```
 
 `INTEGRATOR_ID`、`SECRET_ID` 和 `SECRET_KEY` 需要登录 [HandaaS](https://www.handaas.com/) 注册并开通对接器后获取。真实凭据只应保存在本地 `.env` 或部署密钥中。
+
+## 使用官方Remote服务
+
+### 1. 直接设置Cursor / Cherry Studio MCP配置
+
+```json
+{
+  "mcpServers": {
+    "information-mcp-server":{
+      "type": "streamableHttp",
+      "url": "https://mcp.handaas.com/information/information_bigdata?token={token}"
+      }
+  }
+}
+```
+
+### 注意：integrator_id、secret_id、secret_key及token需要登录 https://www.handaas.com/ 进行注册开通平台获取
 
 ## 可用工具与 Product ID
 
